@@ -5,6 +5,13 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { fadeDown, fadeUp, scaleIn, stagger } from "@/lib/motion";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 const kycList = [
   {
     id: 1,
@@ -13,7 +20,7 @@ const kycList = [
     country: "MX",
     submitted: "Jul 2, 2025",
     status: "pending",
-    docs: ["ID Card", "Selfie"],
+    docs: ["Front ID Card", "Back ID Card", "Selfie"],
   },
   {
     id: 2,
@@ -22,7 +29,7 @@ const kycList = [
     country: "CN",
     submitted: "Jul 5, 2025",
     status: "pending",
-    docs: ["Passport", "Selfie", "Address Proof"],
+    docs: ["Front ID Card", "Back ID Card", "Selfie", "Address Proof"],
   },
   {
     id: 3,
@@ -31,7 +38,7 @@ const kycList = [
     country: "BR",
     submitted: "Jul 6, 2025",
     status: "review",
-    docs: ["Driver License", "Selfie"],
+    docs: ["Front ID Card", "Back ID Card", "Selfie"],
   },
   {
     id: 4,
@@ -40,7 +47,7 @@ const kycList = [
     country: "EG",
     submitted: "Jul 7, 2025",
     status: "pending",
-    docs: ["National ID", "Selfie"],
+    docs: ["Front ID Card", "Back ID Card", "Selfie"],
   },
 ];
 function AdminKYC() {
@@ -59,6 +66,13 @@ function AdminKYC() {
       description: `${name}'s verification was rejected.`,
       variant: "destructive",
     });
+  };
+
+  const getDocImage = (docName) => {
+    const lowerDoc = docName.toLowerCase();
+    if (lowerDoc.includes("selfie")) return "/images/kyc/selfie.png";
+    if (lowerDoc.includes("back")) return "/images/kyc/id_back.png";
+    return "/images/kyc/id_front.png";
   };
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
@@ -146,12 +160,27 @@ function AdminKYC() {
                   </div>
                   <div className="mt-3 flex flex-wrap gap-2">
                     {kyc.docs.map((doc) => (
-                      <button
-                        key={doc}
-                        className="flex items-center gap-1.5 rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground"
-                      >
-                        <FileCheck className="h-3 w-3" /> {doc} <Eye className="ml-0.5 h-3 w-3" />
-                      </button>
+                      <Dialog key={doc}>
+                        <DialogTrigger asChild>
+                          <button
+                            className="flex items-center gap-1.5 rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground"
+                          >
+                            <FileCheck className="h-3 w-3" /> {doc} <Eye className="ml-0.5 h-3 w-3" />
+                          </button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[500px]">
+                          <DialogHeader>
+                            <DialogTitle>{kyc.name} - {doc}</DialogTitle>
+                          </DialogHeader>
+                          <div className="mt-4 overflow-hidden rounded-xl border border-border flex items-center justify-center bg-muted/50 p-2">
+                            <img 
+                              src={getDocImage(doc)} 
+                              alt={doc} 
+                              className="w-full max-h-[60vh] object-contain rounded-lg" 
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
                     ))}
                   </div>
                   <AnimatePresence>
