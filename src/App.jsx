@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import LandingPage from "./pages/landing/Landing";
 import AboutPage from "./pages/about/About";
 import ContactPage from "./pages/contact/Contact";
@@ -28,8 +29,9 @@ import AdminKYC from "./pages/admin/AdminKYC";
 import AdminProviders from "./pages/admin/AdminProviders";
 import AdminServices from "./pages/admin/AdminServices";
 import NotFound from "./pages/not-found/NotFound";
-// import { ResetPasswordPage } from "@/pages/auth/ForgotPassword";
+
 const queryClient = new QueryClient();
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
@@ -43,6 +45,7 @@ const App = () => (
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/faq" element={<FAQPage />} />
+            
             {/* Auth */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -50,25 +53,32 @@ const App = () => (
             <Route path="/2fa" element={<TwoFactorVerifyPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            
             {/* User Dashboard */}
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<DashboardHome />} />
-              <Route path="send" element={<SendMoneyPage />} />
-              <Route path="receive" element={<ReceiveMoneyPage />} />
-              <Route path="transactions" element={<TransactionsPage />} />
-              <Route path="bills" element={<BillsPage />} />
-              <Route path="funds" element={<FundsPage />} />
-              <Route path="settings" element={<SettingsPage />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<DashboardHome />} />
+                <Route path="send" element={<SendMoneyPage />} />
+                <Route path="receive" element={<ReceiveMoneyPage />} />
+                <Route path="transactions" element={<TransactionsPage />} />
+                <Route path="bills" element={<BillsPage />} />
+                <Route path="funds" element={<FundsPage />} />
+                <Route path="settings" element={<SettingsPage />} />
+              </Route>
             </Route>
+
             {/* Admin Dashboard */}
-            <Route path="/admin" element={<DashboardLayout isAdmin />}>
-              <Route index element={<AdminOverview />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="kyc" element={<AdminKYC />} />
-              <Route path="transactions" element={<TransactionsPage />} />
-              <Route path="providers" element={<AdminProviders />} />
-              <Route path="services" element={<AdminServices />} />
+            <Route element={<ProtectedRoute adminOnly />}>
+              <Route path="/admin" element={<DashboardLayout isAdmin />}>
+                <Route index element={<AdminOverview />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="kyc" element={<AdminKYC />} />
+                <Route path="transactions" element={<TransactionsPage />} />
+                <Route path="providers" element={<AdminProviders />} />
+                <Route path="services" element={<AdminServices />} />
+              </Route>
             </Route>
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
@@ -76,5 +86,5 @@ const App = () => (
     </ThemeProvider>
   </QueryClientProvider>
 );
-var stdin_default = App;
-export { stdin_default as default };
+
+export default App;

@@ -9,19 +9,20 @@ import {
   ArrowRight,
   Fingerprint,
   TrendingUp,
-  Send,
   CheckCircle,
-  Star,
-  Moon,
   Sun,
+  Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { useTheme } from "@/hooks/use-theme";
 import { motion } from "framer-motion";
-import { fadeDown, fadeUp, stagger } from "@/lib/motion";
+import { fadeUp, stagger } from "@/lib/motion";
+import { toast } from "sonner";
+import api from "@/lib/api";
+import useAuthStore from "@/store/authStore";
+import axios from "axios";
 
 const highlights = [
   { icon: Shield, label: "256-bit SSL Encryption" },
@@ -47,13 +48,51 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  
+  const login = useAuthStore((state) => state.login);
+  const fetchMe = useAuthStore((state) => state.fetchMe);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setLoading(false);
-    navigate("/2fa");
+    
+    try {
+      const res = await api.post("/auth/login", { email, password });
+      // const res = await axios.post("http://localhost:3000/api/v1/auth/login", { email, password });
+      
+      // Handle MFA verification requirement
+      if (res.data.requires2FA) {
+        toast.info(res.data.message);
+        // Redirect to 2FA page and pass the response data as state
+        navigate("/2fa", { state: res.data.data });
+        return;
+      }
+      
+      // Handle successful login directly
+      if (res.data.success && res.data.token) {
+        toast.success(res.data.message || "Logged in successfully");
+        login(null, res.data.token);
+        await fetchMe();
+        navigate("/dashboard");
+      }
+      
+    } catch (error) {
+      const errorData = error.response?.data;
+      
+      if (errorData) {
+        if (!errorData.success && errorData.message === "Please verify your email before logging in.") {
+          toast.error(errorData.message);
+          // Redirect to OTP verification passing the email
+          navigate("/otp-verify", { state: { email } });
+        } else {
+          toast.error(errorData.message || "Login failed");
+        }
+      } else {
+        toast.error("Network error. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -244,7 +283,6 @@ function LoginPage() {
                 </Label>
                 <Link
                   to="/forgot-password"
-                  size="sm"
                   className="text-xs font-semibold text-accent hover:text-accent/80 transition-colors"
                 >
                   Forgot password?
