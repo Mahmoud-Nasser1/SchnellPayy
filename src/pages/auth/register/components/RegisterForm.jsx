@@ -23,6 +23,8 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { fadeDown, fadeUp, stagger } from "@/lib/motion";
 import CountrySelect from "./CountrySelect";
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 function RegisterForm({ theme, toggleTheme }) {
   const [loading, setLoading] = useState(false);
@@ -86,9 +88,30 @@ function RegisterForm({ theme, toggleTheme }) {
     if (!agreed) return;
     if (!validate()) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1500));
-    setLoading(false);
-    navigate("/otp-verify");
+    
+    try {
+      const payload = {
+        fname: form.firstName,
+        lname: form.lastName,
+        email: form.email,
+        password: form.password,
+        phone: form.phone,
+        country: form.country,
+        user_name: form.username,
+        transaction_pin: form.transPin
+      };
+      
+      const res = await api.post("/auth/register", payload);
+      
+      if (res.data.success) {
+        toast.success("Registration successful! Please verify your email.");
+        navigate("/otp-verify", { state: { email: form.email } });
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

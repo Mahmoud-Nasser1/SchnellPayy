@@ -58,7 +58,6 @@ function LoginPage() {
     
     try {
       const res = await api.post("/auth/login", { email, password });
-      // const res = await axios.post("http://localhost:3000/api/v1/auth/login", { email, password });
       
       // Handle MFA verification requirement
       if (res.data.requires2FA) {

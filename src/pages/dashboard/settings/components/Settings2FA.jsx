@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Smartphone, Key, Shield, Lock, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 export default function Settings2FA({
   twoFaEnabled,
@@ -11,6 +14,30 @@ export default function Settings2FA({
   showPwd,
   setShowPwd,
 }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!currentPassword || !newPassword) {
+      toast.error("Please fill in both password fields.");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const res = await api.post("/auth/change-password", { currentPassword, newPassword });
+      toast.success(res.data?.message || "Password changed successfully!");
+      setCurrentPassword("");
+      setNewPassword("");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to change password.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between rounded-xl border border-border bg-muted/50 p-4">
@@ -106,14 +133,21 @@ export default function Settings2FA({
         <h3 className="font-display font-semibold text-foreground">
           Change Password
         </h3>
-        <div className="space-y-4">
+        <form onSubmit={handleChangePassword} className="space-y-4">
           <div>
             <Label className="text-xs font-medium text-foreground">
               Current Password
             </Label>
             <div className="relative mt-1.5">
               <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input type="password" placeholder="••••••••" className="pl-10" />
+              <Input 
+                type="password" 
+                placeholder="••••••••" 
+                className="pl-10" 
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
             </div>
           </div>
           <div>
@@ -126,6 +160,9 @@ export default function Settings2FA({
                 type={showPwd ? "text" : "password"}
                 placeholder="Min. 8 characters"
                 className="pl-10 pr-10"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
               />
               <button
                 type="button"
@@ -140,10 +177,10 @@ export default function Settings2FA({
               </button>
             </div>
           </div>
-        </div>
-        <Button variant="accent" className="shadow-glow">
-          Update Password
-        </Button>
+          <Button type="submit" variant="accent" className="shadow-glow" disabled={loading}>
+            {loading ? "Updating..." : "Update Password"}
+          </Button>
+        </form>
       </div>
     </div>
   );

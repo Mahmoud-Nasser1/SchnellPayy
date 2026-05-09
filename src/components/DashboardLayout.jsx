@@ -28,6 +28,8 @@ import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
 import { NavLink } from "@/components/NavLink";
 import NotificationsPanel from "@/components/NotificationsPanel";
+import useAuthStore from "@/store/authStore";
+import { useNavigate } from "react-router-dom";
 const userNav = [
   { icon: LayoutDashboard, label: "Dashboard", to: "/dashboard" },
   { icon: Send, label: "Send Money", to: "/dashboard/send" },
@@ -51,7 +53,15 @@ function DashboardLayout({ isAdmin = false }) {
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { logout, user } = useAuthStore();
+  const navigate = useNavigate();
   const nav = isAdmin ? adminNav : userNav;
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
   return (
     <div className="flex min-h-screen bg-background">
       {/* ── Desktop Sidebar ── */}

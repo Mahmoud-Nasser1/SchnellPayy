@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Shield,
   Mail,
@@ -12,8 +12,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-const MOCK_OTP = "123456";
+import { toast } from "sonner";
+import api from "@/lib/api";
 
 function ForgotPasswordPage() {
   const [step, setStep] = useState("email");
@@ -22,7 +22,8 @@ function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [timer, setTimer] = useState(45);
-
+  
+  const navigate = useNavigate();
   const inputs = useRef([]);
 
   useEffect(() => {
@@ -36,11 +37,33 @@ function ForgotPasswordPage() {
   }, [timer, step]);
 
   const sendOTP = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
+    if (!email) return;
+    
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1200));
-    setLoading(false);
-    setStep("otp");
+    try {
+      const res = await api.post("/auth/forget-password", { email });
+      toast.success(res.data.message || "OTP sent to your email");
+      setStep("otp");
+      setTimer(45);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to send OTP");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (!email) return;
+    try {
+      await api.post("/auth/resend-otp", { email, type: "reset" });
+      toast.success("OTP resent to your email");
+      setTimer(45);
+      setOtp(["", "", "", "", "", ""]);
+      inputs.current[0]?.focus();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to resend OTP");
+    }
   };
 
   const handleChange = (i, val) => {
@@ -56,17 +79,19 @@ function ForgotPasswordPage() {
 
   const verifyOTP = async () => {
     const code = otp.join("");
+    if (code.length < 6) return;
 
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-
-    if (code === MOCK_OTP) {
-      window.location.href = "/reset-password";
-    } else {
-      setError("Invalid verification code");
+    try {
+      const res = await api.post("/auth/verify-reset-otp", { email, otp: code });
+      toast.success(res.data.message || "OTP verified");
+      navigate("/reset-password", { state: { email } });
+    } catch (err) {
+      setError(err.response?.data?.message || "Invalid verification code");
       setOtp(["", "", "", "", "", ""]);
       inputs.current[0]?.focus();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,16 +132,20 @@ function ForgotPasswordPage() {
                     className="mt-2 h-11"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    required
                   />
                 </div>
 
                 <Button
                   className="h-11 w-full shadow-glow"
                   variant="accent"
-                  disabled={loading}
+                  disabled={loading || !email}
                 >
                   {loading ? (
-                    "Sending..."
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent-foreground/30 border-t-accent-foreground" />
+                      Sending...
+                    </div>
                   ) : (
                     <>
                       Send OTP <ArrowRight className="ml-2 h-4 w-4" />
@@ -136,7 +165,7 @@ function ForgotPasswordPage() {
 
               <h1 className="text-2xl font-bold">OTP CODE</h1>
               <p className="mb-6 text-sm text-muted-foreground">
-                Enter the 6-digit secure code
+                Enter the 6-digit secure code sent to {email}
               </p>
 
               {/* PIN INPUTS (PRO STYLE) */}
@@ -148,6 +177,11 @@ function ForgotPasswordPage() {
                     value={d}
                     maxLength={1}
                     onChange={(e) => handleChange(i, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Backspace" && !otp[i] && i > 0) {
+                        inputs.current[i - 1]?.focus();
+                      }
+                    }}
                     className={`
                       h-14 w-12 rounded-xl border text-center text-lg font-bold
                       bg-background transition-all duration-200
@@ -174,7 +208,14 @@ function ForgotPasswordPage() {
                 variant="accent"
                 disabled={otp.join("").length < 6 || loading}
               >
-                {loading ? "Verifying..." : "Verify OTP"}
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent-foreground/30 border-t-accent-foreground" />
+                    Verifying...
+                  </div>
+                ) : (
+                  "Verify OTP"
+                )}
               </Button>
 
               {/* TIMER */}
@@ -183,7 +224,7 @@ function ForgotPasswordPage() {
                   <>Resend in 0:{String(timer).padStart(2, "0")}</>
                 ) : (
                   <button
-                    onClick={() => setTimer(45)}
+                    onClick={handleResendOTP}
                     className="mx-auto flex items-center gap-1 text-accent hover:underline"
                   >
                     <RefreshCw className="h-3.5 w-3.5" />

@@ -16,7 +16,16 @@ const useAuthStore = create((set, get) => ({
     });
   },
 
-  logout: () => {
+  logout: async () => {
+    const token = get().token;
+    if (token) {
+      try {
+        await api.post('/auth/logout');
+      } catch (error) {
+        console.error("Logout API failed, continuing local clear", error);
+      }
+    }
+    
     set({
       user: null,
       token: null,
