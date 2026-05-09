@@ -52,15 +52,17 @@ function DashboardLayout({ isAdmin = false }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { logout, user } = useAuthStore();
   const navigate = useNavigate();
   const nav = isAdmin ? adminNav : userNav;
 
   const handleLogout = async () => {
+    setIsLoggingOut(true);
     await logout();
     navigate("/login");
-    console.log("Logout Clicked");
+    setIsLoggingOut(false);
   };
 
   return (
@@ -289,13 +291,18 @@ function DashboardLayout({ isAdmin = false }) {
                   >
                     <Settings className="h-4 w-4" /> Settings
                   </Link>
-                  <Link
-                    // to="/login"
+                  <button
                     onClick={handleLogout}
-                    className="hover:bg-destructive/8 flex items-center gap-2.5 px-4 py-2.5 text-sm text-destructive transition-colors"
+                    disabled={isLoggingOut}
+                    className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
                   >
-                    <LogOut className="h-4 w-4" /> Sign out
-                  </Link>
+                    {isLoggingOut ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-destructive/20 border-t-destructive" />
+                    ) : (
+                      <LogOut className="h-4 w-4" />
+                    )}
+                    {isLoggingOut ? "Signing out..." : "Sign out"}
+                  </button>
                 </div>
               )}
             </div>
