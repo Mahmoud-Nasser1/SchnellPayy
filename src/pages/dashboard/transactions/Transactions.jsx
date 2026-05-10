@@ -110,6 +110,7 @@ function TransactionsPage() {
         // Evaluate isCredit based on transaction logic
         const isCredit = 
           tx.transaction_type === "deposit" || 
+          tx.transaction_type === "refund" ||
           (tx.transaction_type === "transfer" && tx.receiver_id === userId);
 
         const txName = tx.description || tx.sender_name || tx.receiver_name || tx.name || "Transaction";

@@ -59,15 +59,13 @@ const useAuthStore = create((set, get) => ({
   fetchMe: async () => {
     const token = get().token;
     if (!token) {
-        set({ loading: false });
         return;
     }
     
-    set({ loading: true });
     try {
       const response = await api.get('/users/getMe');
       const fetchedUser = response.data?.data?.user || response.data?.user || response.data;
-      set({ user: fetchedUser, isAuthenticated: true, loading: false });
+      set({ user: fetchedUser, isAuthenticated: true });
     } catch (error) {
       console.error("Failed to fetch user:", error);
       get().logout();

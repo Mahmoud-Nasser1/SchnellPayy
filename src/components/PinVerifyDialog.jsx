@@ -45,55 +45,65 @@ function PinVerifyDialog({
           <DialogTitle className="font-display">{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col items-center gap-4 py-3">
-          <InputOTP
-            maxLength={6}
-            value={pin}
-            onChange={(v) => {
-              setPin(v);
-              setError("");
-            }}
-            inputMode="numeric"
-            pattern="[0-9]*"
-          >
-            <InputOTPGroup className="gap-2">
-              {[0, 1, 2, 3, 4, 5].map((i) => (
-                <InputOTPSlot
-                  key={i}
-                  index={i}
-                  className="h-12 w-10 rounded-xl border border-input text-lg first:rounded-xl last:rounded-xl"
-                />
-              ))}
-            </InputOTPGroup>
-          </InputOTP>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -4 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center gap-1.5 text-xs text-destructive"
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (pin.length >= 6) {
+              handleVerify();
+            }
+          }}
+        >
+          <div className="flex flex-col items-center gap-4 py-3">
+            <InputOTP
+              maxLength={6}
+              value={pin}
+              onChange={(v) => {
+                setPin(v);
+                setError("");
+              }}
+              inputMode="numeric"
+              pattern="[0-9]*"
             >
-              <AlertCircle className="h-3.5 w-3.5" />
-              {error}
-            </motion.div>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            className="flex-1"
-            onClick={() => onOpenChange(false)}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="accent"
-            className="flex-1 shadow-glow"
-            onClick={handleVerify}
-            disabled={pin.length < 6}
-          >
-            Verify & Continue
-          </Button>
-        </div>
+              <InputOTPGroup className="gap-2">
+                {[0, 1, 2, 3, 4, 5].map((i) => (
+                  <InputOTPSlot
+                    key={i}
+                    index={i}
+                    className="h-12 w-10 rounded-xl border border-input text-lg first:rounded-xl last:rounded-xl"
+                  />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-1.5 text-xs text-destructive"
+              >
+                <AlertCircle className="h-3.5 w-3.5" />
+                {error}
+              </motion.div>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="accent"
+              className="flex-1 shadow-glow"
+              disabled={pin.length < 6}
+            >
+              Verify & Continue
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

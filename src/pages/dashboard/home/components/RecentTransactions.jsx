@@ -63,9 +63,12 @@ function RecentTransactions() {
           </div>
         ) : (
           transactions.map((tx) => {
-            const isReceived = tx.receiver_username === currentUsername;
+            const isReceived = 
+              tx.receiver_username === currentUsername ||
+              tx.transaction_type === "deposit" ||
+              tx.transaction_type === "refund";
             const counterparty = isReceived
-              ? tx.sender_name || "Deposit"
+              ? tx.sender_name || (tx.transaction_type === "refund" ? "Refund" : "Deposit")
               : tx.receiver_name || tx.description || "Payment";
             const amount = parseFloat(tx.amount);
             const currency = userData?.currency || "EGP";
