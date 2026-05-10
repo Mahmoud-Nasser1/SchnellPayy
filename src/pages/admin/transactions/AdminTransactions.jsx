@@ -8,10 +8,10 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
 import TransactionsFilter from "./components/TransactionsFilter";
-import TransactionsTable from "./components/TransactionsTable";
+import AdminTransactionsTable from "./components/AdminTransactionsTable";
 import useAuthStore from "@/store/authStore";
 
-function TransactionsPage() {
+function AdminTransactions() {
   const { user } = useAuthStore();
   const userId = user?.data?.user_id || user?.user_id;
 
@@ -34,10 +34,12 @@ function TransactionsPage() {
     setPage(1);
   };
 
+  
   const handleFilterChange = (val) => {
     setFilter(val);
     setPage(1);
   };
+
 
   useEffect(() => {
     let active = true;
@@ -46,14 +48,13 @@ function TransactionsPage() {
       try {
         const params = { page, limit };
         if (filter !== "all") {
-          // Map frontend filter logic to backend type if needed
-          params.type = filter === "credit" ? "income" : "expense";
+          params.status = filter;
         }
         if (search) {
           params.search = search;
         }
 
-        const res = await api.get('/transactions/user', { params });
+        const res = await api.get('/transactions', { params });
         if (active && res.data) {
           setTransactions(res.data.data || []);
           setTotalCount(res.data.total || 0);
@@ -81,6 +82,7 @@ function TransactionsPage() {
     };
   }, [page, limit, filter, search, refreshTrigger]);
 
+
   const handleDownload = async () => {
     if (totalCount === 0) return;
     
@@ -89,19 +91,19 @@ function TransactionsPage() {
       // Fetch all transactions for the current filter
       const params = { page: 1, limit: totalCount || 1000 };
       if (filter !== "all") {
-        params.type = filter === "credit" ? "income" : "expense";
+        params.status = filter;
       }
       if (search) {
         params.search = search;
       }
       
-      const res = await api.get('/transactions/user', { params });
+      const res = await api.get('/transactions', { params });
       const allTransactions = res.data?.data || [];
 
       if (allTransactions.length === 0) return;
 
       const doc = new jsPDF();
-      doc.text("Transaction History", 14, 15);
+      doc.text("All Users Transaction History (Admin)", 14, 15);
       
       const tableColumn = ["ID / Ref", "Description", "Type", "Status", "Date", "Amount"];
       const tableRows = [];
@@ -133,7 +135,7 @@ function TransactionsPage() {
         startY: 20,
       });
 
-      doc.save("transactions_history.pdf");
+      doc.save("admin_transactions_history.pdf");
     } catch (error) {
       console.error("Failed to generate PDF", error);
     } finally {
@@ -149,9 +151,9 @@ function TransactionsPage() {
         className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center"
       >
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">Transaction History</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">Global Transactions</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            View and manage all your transactions
+            Manage and review all system transactions
           </p>
         </div>
         <Button variant="outline" onClick={handleDownload} disabled={downloadLoading}>
@@ -176,7 +178,7 @@ function TransactionsPage() {
         setFilter={handleFilterChange}
       />
 
-      <TransactionsTable 
+      <AdminTransactionsTable 
         transactions={transactions} 
         totalCount={totalCount} 
         page={page}
@@ -189,4 +191,4 @@ function TransactionsPage() {
     </motion.div>
   );
 }
-export { TransactionsPage as default };
+export { AdminTransactions as default };

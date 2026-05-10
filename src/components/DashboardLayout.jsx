@@ -65,6 +65,22 @@ function DashboardLayout({ isAdmin = false }) {
     setIsLoggingOut(false);
   };
 
+  const fetchedUser = useAuthStore((state) => state.user);
+  // console.log("Current user in DashboardLayout:", fetchedUser);
+  const {
+    user_id,
+    f_name,
+    l_name,
+    email,
+    phone,
+    country,
+    role,
+    account_status,
+    is_verified,
+    mfa_enabled,
+    creation_date,
+  } = fetchedUser.data;
+
   return (
     <div className="flex min-h-screen bg-background">
       {/* ── Desktop Sidebar ── */}
@@ -120,7 +136,9 @@ function DashboardLayout({ isAdmin = false }) {
               activeClassName="bg-sidebar-primary/12 text-sidebar-primary border-r-2 border-sidebar-primary"
             >
               <Icon className="h-[18px] w-[18px] shrink-0" />
-              {sidebarOpen && <span className="whitespace-nowrap">{label}</span>}
+              {sidebarOpen && (
+                <span className="whitespace-nowrap">{label}</span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -209,7 +227,11 @@ function DashboardLayout({ isAdmin = false }) {
               className="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground lg:flex"
               aria-label="Toggle sidebar"
             >
-              {sidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {sidebarOpen ? (
+                <ChevronLeft className="h-4 w-4" />
+              ) : (
+                <Menu className="h-4 w-4" />
+              )}
             </button>
             {isAdmin && (
               <span className="hidden items-center gap-1.5 rounded-full border border-warning/20 bg-warning/10 px-2.5 py-1 text-xs font-semibold text-warning md:inline-flex">
@@ -225,7 +247,11 @@ function DashboardLayout({ isAdmin = false }) {
               className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               aria-label="Toggle theme"
             >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
             </button>
             {/* Notifications */}
             <div className="relative">
@@ -240,7 +266,9 @@ function DashboardLayout({ isAdmin = false }) {
                 <Bell className="h-5 w-5" />
                 <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full border-2 border-card bg-destructive" />
               </button>
-              {notifOpen && <NotificationsPanel onClose={() => setNotifOpen(false)} />}
+              {notifOpen && (
+                <NotificationsPanel onClose={() => setNotifOpen(false)} />
+              )}
             </div>
             {/* Profile dropdown */}
             <div className="relative ml-1">
@@ -252,12 +280,16 @@ function DashboardLayout({ isAdmin = false }) {
                 className="flex items-center gap-2.5 rounded-xl py-1.5 pl-2 pr-3 transition-colors hover:bg-muted"
               >
                 <div className="gradient-card flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-primary-foreground">
-                  JD
+                  {f_name?.[0]}
+                  {l_name?.[0]}
                 </div>
                 <div className="hidden text-left md:block">
-                  <p className="text-sm font-semibold leading-none text-foreground">John Doe</p>
+                  <p className="text-sm font-semibold leading-none text-foreground">
+                    {" "}
+                    {f_name} {l_name}{" "}
+                  </p>
                   <p className="mt-0.5 text-[11px] leading-none text-muted-foreground">
-                    Verified Account
+                    {is_verified ? "Verified User" : "Unverified User"}
                   </p>
                 </div>
                 <ChevronDown
@@ -273,11 +305,16 @@ function DashboardLayout({ isAdmin = false }) {
                   <div className="border-b border-border px-4 py-3">
                     <div className="mb-2 flex items-center gap-3">
                       <div className="gradient-card flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-primary-foreground">
-                        JD
+                        {f_name?.[0]}
+                        {l_name?.[0]}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold text-foreground">John Doe</p>
-                        <p className="text-xs text-muted-foreground">john@example.com</p>
+                        <p className="text-sm font-semibold text-foreground">
+                          {f_name} {l_name}
+                        </p>
+                        <p className="text-xs text-muted-foreground break-all">
+                          {email}
+                        </p>
                       </div>
                     </div>
                     <span className="secure-badge">
