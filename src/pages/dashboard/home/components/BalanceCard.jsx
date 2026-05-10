@@ -1,6 +1,19 @@
 import { TrendingUp, Eye, EyeOff, Wallet, Shield } from "lucide-react";
+import useAuthStore from "@/store/authStore";
 
 function BalanceCard({ balanceHidden, setBalanceHidden }) {
+  const { user } = useAuthStore();
+  const userData = user?.data || user || {};
+  const balance = userData?.balance || 0;
+  const currency = userData?.currency || "EGP";
+
+  const formatCurrency = (val) => {
+    return new Intl.NumberFormat('en-EG', {
+      style: 'currency',
+      currency: currency,
+    }).format(val);
+  };
+
   return (
     <div className="balance-card relative overflow-hidden rounded-2xl p-6 shadow-navy lg:col-span-2">
       <div className="relative z-10">
@@ -11,7 +24,7 @@ function BalanceCard({ balanceHidden, setBalanceHidden }) {
             </p>
             <div className="flex items-center gap-3">
               <p className="font-display text-4xl font-bold tracking-tight text-primary-foreground">
-                {balanceHidden ? "••••••••" : "$48,250.00"}
+                {balanceHidden ? "••••••••" : formatCurrency(balance)}
               </p>
               <button
                 onClick={() => setBalanceHidden(!balanceHidden)}
@@ -27,7 +40,7 @@ function BalanceCard({ balanceHidden, setBalanceHidden }) {
             </div>
             <div className="mt-2 flex items-center gap-1.5">
               <TrendingUp className="h-3.5 w-3.5 text-accent" />
-              <span className="text-sm font-semibold text-accent">+12.4% this month</span>
+              <span className="text-sm font-semibold text-accent">+0.0% this month</span>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2 text-right">
@@ -40,11 +53,10 @@ function BalanceCard({ balanceHidden, setBalanceHidden }) {
           </div>
         </div>
         {/* Sub-balances */}
-        <div className="mt-4 grid grid-cols-3 gap-3 border-t border-primary-foreground/10 pt-4">
+        <div className="mt-4 grid grid-cols-2 gap-3 border-t border-primary-foreground/10 pt-4">
           {[
-            { label: "Available", value: "$46,100.00" },
-            { label: "Pending", value: "$2,150.00" },
-            { label: "Savings", value: "$12,400.00" },
+            { label: "Available", value: formatCurrency(balance) },
+            { label: "Pending", value: formatCurrency(0) },
           ].map(({ label, value }) => (
             <div key={label}>
               <p className="mb-1 text-[11px] uppercase tracking-wide text-primary-foreground/50">

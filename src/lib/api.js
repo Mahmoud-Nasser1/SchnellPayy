@@ -44,8 +44,12 @@ api.interceptors.response.use(
 
     // Handle 401 Unauthorized errors
     if (error.response?.status === 401 && !originalRequest._retry) {
-      // Don't retry if the failed request was a login or a refresh token request
-      if (originalRequest.url === '/auth/login' || originalRequest.url === '/auth/refresh-token') {
+      // Don't retry if the failed request was a login, refresh, or 2FA validation
+      if (
+        originalRequest.url === "/auth/login" ||
+        originalRequest.url === "/auth/refresh-token" ||
+        originalRequest.url === "/auth/2fa/validate"
+      ) {
         return Promise.reject(error);
       }
 

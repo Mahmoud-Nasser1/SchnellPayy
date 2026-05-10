@@ -23,9 +23,11 @@ import {
   ChevronLeft,
   Server,
   Layers,
+  RefreshCw,
 } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
+import { motion, AnimatePresence } from "framer-motion";
 import { NavLink } from "@/components/NavLink";
 import NotificationsPanel from "@/components/NotificationsPanel";
 import useAuthStore from "@/store/authStore";
@@ -66,7 +68,10 @@ function DashboardLayout({ isAdmin = false }) {
   };
 
   const fetchedUser = useAuthStore((state) => state.user);
-  // console.log("Current user in DashboardLayout:", fetchedUser);
+  
+  // Resilient extraction to handle different store formats
+  const userData = fetchedUser?.data || fetchedUser || {};
+  
   const {
     user_id,
     f_name,
@@ -79,10 +84,37 @@ function DashboardLayout({ isAdmin = false }) {
     is_verified,
     mfa_enabled,
     creation_date,
-  } = fetchedUser.data;
+    balance,
+    currency,
+  } = userData;
 
   return (
     <div className="flex min-h-screen bg-background">
+      {/* ── Logout Overlay ── */}
+      <AnimatePresence>
+        {isLoggingOut && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-background/80 backdrop-blur-md"
+          >
+            <div className="relative flex flex-col items-center">
+              <div className="gradient-accent mb-6 flex h-16 w-16 items-center justify-center rounded-2xl shadow-glow animate-bounce">
+                <Shield className="h-8 w-8 text-accent-foreground" />
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <h2 className="font-display text-xl font-bold">Signing you out</h2>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <RefreshCw className="h-4 w-4 animate-spin text-accent" />
+                  Securing your session...
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── Desktop Sidebar ── */}
       <aside
         className={cn(
@@ -149,19 +181,23 @@ function DashboardLayout({ isAdmin = false }) {
             !sidebarOpen && "flex justify-center",
           )}
         >
-          <Link
-            // to="/login"
+          <button
             onClick={handleLogout}
+            disabled={isLoggingOut}
             className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm",
+              "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm",
               "text-sidebar-foreground/45 hover:bg-destructive/10 hover:text-destructive",
-              "transition-colors duration-150",
+              "transition-colors duration-150 disabled:opacity-50",
               !sidebarOpen && "justify-center px-0",
             )}
           >
-            <LogOut className="h-[18px] w-[18px] shrink-0" />
-            {sidebarOpen && <span>Sign out</span>}
-          </Link>
+            {isLoggingOut ? (
+              <RefreshCw className="h-[18px] w-[18px] shrink-0 animate-spin" />
+            ) : (
+              <LogOut className="h-[18px] w-[18px] shrink-0" />
+            )}
+            {sidebarOpen && <span>{isLoggingOut ? "Signing out..." : "Sign out"}</span>}
+          </button>
         </div>
       </aside>
       {/* ── Mobile Sidebar Overlay ── */}
@@ -317,9 +353,11 @@ function DashboardLayout({ isAdmin = false }) {
                         </p>
                       </div>
                     </div>
-                    <span className="secure-badge">
-                      <Shield className="h-2.5 w-2.5" /> KYC Verified
-                    </span>
+                    {is_verified && (
+                      <span className="secure-badge">
+                        <Shield className="h-2.5 w-2.5" /> KYC Verified
+                      </span>
+                    )}
                   </div>
                   <Link
                     to="/dashboard/settings"

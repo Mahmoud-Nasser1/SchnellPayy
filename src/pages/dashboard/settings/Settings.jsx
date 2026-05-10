@@ -54,10 +54,8 @@ const activityLog = [
 
 function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
-  const [twoFaEnabled, setTwoFaEnabled] = useState(true);
   const [emailNotif, setEmailNotif] = useState(true);
   const [smsNotif, setSmsNotif] = useState(false);
-  const [showPwd, setShowPwd] = useState(false);
   const [saved, setSaved] = useState(false);
   const [kycUploads, setKycUploads] = useState({});
   const [kycSubmitting, setKycSubmitting] = useState(false);
@@ -136,12 +134,7 @@ function SettingsPage() {
               )}
 
               {activeTab === "2fa" && (
-                <Settings2FA
-                  twoFaEnabled={twoFaEnabled}
-                  setTwoFaEnabled={setTwoFaEnabled}
-                  showPwd={showPwd}
-                  setShowPwd={setShowPwd}
-                />
+                <Settings2FA />
               )}
 
               {activeTab === "activity" && (
