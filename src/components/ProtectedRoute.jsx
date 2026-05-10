@@ -1,9 +1,10 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import useAuthStore from '@/store/authStore';
 
 export const ProtectedRoute = ({ adminOnly = false }) => {
   const { isAuthenticated, loading, user } = useAuthStore();
+  const location = useLocation();
 
   if (loading) {
     // You can replace this with a proper skeleton loader if preferred
@@ -11,7 +12,7 @@ export const ProtectedRoute = ({ adminOnly = false }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
 
   if (adminOnly && user?.role !== 'admin') {

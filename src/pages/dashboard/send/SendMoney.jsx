@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { fadeDown, stagger } from "@/lib/motion";
 import PinVerifyDialog from "@/components/PinVerifyDialog";
+import { useSearchParams } from "react-router-dom";
 
 import SendStepsProgress from "./components/SendStepsProgress";
 import SendRecipientStep from "./components/SendRecipientStep";
@@ -15,15 +16,49 @@ import api from "@/lib/api";
 // No mock data needed, we only use live search now
 
 function SendMoneyPage() {
-  const [step, setStep] = useState("recipient");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTo = searchParams.get("to");
+  const initialAmount = searchParams.get("amount");
+  const initialNote = searchParams.get("note");
+
+  const [step, setStep] = useState(initialTo ? "amount" : "recipient");
   const [selected, setSelected] = useState(null);
-  const [amount, setAmount] = useState("");
-  const [note, setNote] = useState("");
+  const [amount, setAmount] = useState(initialAmount || "");
+  const [note, setNote] = useState(initialNote || "");
   const [loading, setLoading] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
 
   const { fetchMe } = useAuthStore();
   const { toast } = useToast();
+
+  // Auto-resolve recipient if linked
+  useEffect(() => {
+    if (initialTo && !selected) {
+      api.get(`/users/search?q=${initialTo}`).then(res => {
+        const users = res.data?.data?.users || [];
+        const match = users.find(u => u.user_name.toLowerCase() === initialTo.toLowerCase());
+        if (match) {
+          setSelected({
+            id: match.user_name,
+            name: match.full_name,
+            username: match.user_name,
+            verified: match.is_verified,
+            avatar: (match.full_name || "U").split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)
+          });
+        } else {
+          // If not found, fallback to search step
+          setStep("recipient");
+          toast({
+            title: "User not found",
+            description: `Could not find a user matching '@${initialTo}'`,
+            variant: "destructive",
+          });
+        }
+      }).catch(err => {
+        setStep("recipient");
+      });
+    }
+  }, [initialTo, selected, toast]);
 
   const handleSend = async (pin) => {
     setLoading(true);

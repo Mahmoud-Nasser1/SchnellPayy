@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Shield,
   Eye,
@@ -47,6 +47,8 @@ function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || "/dashboard";
   const { theme, toggleTheme } = useTheme();
   
   const login = useAuthStore((state) => state.login);
@@ -63,7 +65,7 @@ function LoginPage() {
       if (res.data.requires2FA) {
         toast.info(res.data.message);
         // Redirect to 2FA page and pass the response data as state
-        navigate("/2fa", { state: res.data.data });
+        navigate("/2fa", { state: { ...res.data.data, from } });
         return;
       }
       
@@ -72,7 +74,7 @@ function LoginPage() {
         toast.success(res.data.message || "Logged in successfully");
         login(null, res.data.token);
         await fetchMe();
-        navigate("/dashboard");
+        navigate(from);
       }
       
     } catch (error) {
