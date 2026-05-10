@@ -1,4 +1,5 @@
-import { Users, DollarSign, TrendingUp, Shield } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Users, DollarSign, TrendingUp, Shield, Loader2 } from "lucide-react";
 import {
   BarChart,
   Bar,
@@ -13,80 +14,83 @@ import {
 import { motion } from "framer-motion";
 import { fadeUp, fadeDown, scaleIn, stagger } from "@/lib/motion";
 import { cn } from "@/lib/utils";
-const stats = [
-  {
-    label: "Total Users",
-    value: "124,832",
-    change: "+18.2%",
-    up: true,
-    icon: Users,
-    color: "text-primary dark:text-accent",
-  },
-  {
-    label: "Transaction Volume",
-    value: "$9.4M",
-    change: "+24.1%",
-    up: true,
-    icon: DollarSign,
-    color: "text-accent",
-  },
-  {
-    label: "Revenue (Jul)",
-    value: "$182K",
-    change: "+11.5%",
-    up: true,
-    icon: TrendingUp,
-    color: "text-success",
-  },
-  {
-    label: "Fraud Attempts",
-    value: "23",
-    change: "-44%",
-    up: false,
-    icon: Shield,
-    color: "text-destructive",
-  },
-];
-const chartData = [
-  { day: "Mon", users: 1200, tx: 3400 },
-  { day: "Tue", users: 1800, tx: 4200 },
-  { day: "Wed", users: 1500, tx: 3800 },
-  { day: "Thu", users: 2200, tx: 5100 },
-  { day: "Fri", users: 2800, tx: 6200 },
-  { day: "Sat", users: 2100, tx: 4800 },
-  { day: "Sun", users: 1700, tx: 3900 },
-];
-const recentUsers = [
-  {
-    name: "Sarah Johnson",
-    email: "sarah@example.com",
-    joined: "2 min ago",
-    status: "active",
-    kyc: "verified",
-  },
-  {
-    name: "Carlos Rivera",
-    email: "carlos@example.com",
-    joined: "15 min ago",
-    status: "active",
-    kyc: "pending",
-  },
-  {
-    name: "Emma Wilson",
-    email: "emma@example.com",
-    joined: "1 hr ago",
-    status: "suspended",
-    kyc: "rejected",
-  },
-  {
-    name: "Aarav Patel",
-    email: "aarav@example.com",
-    joined: "3 hrs ago",
-    status: "active",
-    kyc: "verified",
-  },
-];
+import api from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+
 function AdminOverview() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await api.get("/admin/stats");
+        setData(response.data.data);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch dashboard statistics",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const { stats, chartData, recentUsers } = data;
+
+  const statCards = [
+    {
+      label: "Total Users",
+      value: stats.totalUsers.toLocaleString(),
+      change: `+${stats.newUsersThisWeek}`,
+      up: true,
+      icon: Users,
+      color: "text-primary dark:text-accent",
+    },
+    {
+      label: "Transaction Volume",
+      value: stats.totalVolume >= 1000000 
+        ? `$${(stats.totalVolume / 1000000).toFixed(1)}M`
+        : stats.totalVolume >= 1000 
+          ? `$${(stats.totalVolume / 1000).toFixed(1)}K` 
+          : `$${stats.totalVolume.toLocaleString()}`,
+      change: "Total processed",
+      up: true,
+      icon: DollarSign,
+      color: "text-accent",
+    },
+    {
+      label: "Pending Trans.",
+      value: stats.pendingTransactions,
+      change: "Action required",
+      up: false,
+      icon: TrendingUp,
+      color: "text-success",
+    },
+    {
+      label: "Active Users",
+      value: stats.activeUsers.toLocaleString(),
+      change: stats.totalUsers > 0 
+        ? `${((stats.activeUsers / stats.totalUsers) * 100).toFixed(1)}% of total`
+        : "0%",
+      up: true,
+      icon: Shield,
+      color: "text-destructive",
+    },
+  ];
+
   return (
     <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={fadeDown} custom={0}>
@@ -95,9 +99,10 @@ function AdminOverview() {
           Platform health and key metrics at a glance
         </p>
       </motion.div>
+
       {/* Stats */}
       <motion.div variants={stagger} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((s, i) => (
+        {statCards.map((s, i) => (
           <motion.div
             key={s.label}
             variants={scaleIn}
@@ -112,11 +117,12 @@ function AdminOverview() {
             <p
               className={cn("mt-1 text-xs font-medium", s.up ? "text-accent" : "text-destructive")}
             >
-              {s.change} this week
+              {s.change} {s.up ? "new" : ""}
             </p>
           </motion.div>
         ))}
       </motion.div>
+
       {/* Charts */}
       <motion.div variants={fadeUp} custom={2} className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-border bg-card p-5 shadow-card">
@@ -177,7 +183,7 @@ function AdminOverview() {
               />
               <Line
                 type="monotone"
-                dataKey="tx"
+                dataKey="volume"
                 stroke="hsl(var(--primary))"
                 strokeWidth={2.5}
                 dot={false}
@@ -186,6 +192,7 @@ function AdminOverview() {
           </ResponsiveContainer>
         </div>
       </motion.div>
+
       {/* Recent Users */}
       <motion.div
         variants={fadeUp}
@@ -208,35 +215,32 @@ function AdminOverview() {
               className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-muted/30"
             >
               <div className="gradient-card flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold text-primary-foreground">
-                {u.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")}
+                {u.f_name?.[0]}{u.l_name?.[0]}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-foreground">{u.name}</p>
+                <p className="text-sm font-medium text-foreground">{u.f_name} {u.l_name}</p>
                 <p className="text-xs text-muted-foreground">{u.email}</p>
               </div>
-              <span className="hidden text-xs text-muted-foreground sm:block">{u.joined}</span>
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-[10px] font-medium capitalize",
-                  u.status === "active" ? "badge-success" : "badge-danger",
-                )}
-              >
-                {u.status}
+              <span className="hidden text-xs text-muted-foreground sm:block">
+                {new Date(u.creation_date).toLocaleDateString()}
               </span>
               <span
                 className={cn(
                   "rounded-full px-2 py-0.5 text-[10px] font-medium capitalize",
-                  u.kyc === "verified"
-                    ? "badge-success"
-                    : u.kyc === "pending"
-                      ? "badge-warning"
-                      : "badge-danger",
+                  u.account_status === "active" ? "badge-success" : "badge-danger",
                 )}
               >
-                {u.kyc}
+                {u.account_status}
+              </span>
+              <span
+                className={cn(
+                  "rounded-full px-2 py-0.5 text-[10px] font-medium capitalize",
+                  u.is_verified
+                    ? "badge-success"
+                    : "badge-warning",
+                )}
+              >
+                {u.is_verified ? "Verified" : "Unverified"}
               </span>
             </motion.div>
           ))}
@@ -245,4 +249,5 @@ function AdminOverview() {
     </motion.div>
   );
 }
+
 export { AdminOverview as default };
