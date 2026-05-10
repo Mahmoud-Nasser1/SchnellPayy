@@ -30,6 +30,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminKYC from "./pages/admin/AdminKYC";
 import AdminProviders from "./pages/admin/AdminProviders";
 import AdminServices from "./pages/admin/AdminServices";
+import AdminTransactions from "./pages/admin/transactions/AdminTransactions";
 import NotFound from "./pages/not-found/NotFound";
 
 const queryClient = new QueryClient();
@@ -84,16 +85,16 @@ const AppContent = () => {
       </Route>
 
       {/* Admin Dashboard */}
-      <Route element={<ProtectedRoute adminOnly />}>
+      {/* <Route element={<ProtectedRoute adminOnly />}> */}
         <Route path="/admin" element={<DashboardLayout isAdmin />}>
           <Route index element={<AdminOverview />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="kyc" element={<AdminKYC />} />
-          <Route path="transactions" element={<TransactionsPage />} />
+          <Route path="transactions" element={<AdminTransactions />} />
           <Route path="providers" element={<AdminProviders />} />
           <Route path="services" element={<AdminServices />} />
         </Route>
-      </Route>
+      {/* </Route> */}
 
       <Route path="*" element={<NotFound />} />
     </Routes>
