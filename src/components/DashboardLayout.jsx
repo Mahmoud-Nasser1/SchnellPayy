@@ -24,6 +24,8 @@ import {
   Server,
   Layers,
   RefreshCw,
+  Clock,
+  AlertCircle,
 } from "lucide-react";
 import { useTheme } from "@/hooks/use-theme";
 import { cn } from "@/lib/utils";
@@ -73,20 +75,51 @@ function DashboardLayout({ isAdmin = false }) {
   const userData = fetchedUser?.data || fetchedUser || {};
   
   const {
-    user_id,
-    f_name,
-    l_name,
-    email,
-    phone,
-    country,
-    role,
-    account_status,
-    is_verified,
-    mfa_enabled,
-    creation_date,
-    balance,
-    currency,
+    user_name = "",
+    f_name = "",
+    l_name = "",
+    email = "",
+    phone = "",
+    country = "",
+    role = "user",
+    account_status = "active",
+    is_verified = false,
+    kyc_status = "not_submitted",
+    mfa_enabled = false,
+    creation_date = null,
+    balance = 0,
+    currency = "EGP",
   } = userData;
+
+  const kycConfig = {
+    approved: {
+      label: "Verified User",
+      color: "text-emerald-500",
+      badgeClass: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+      icon: Shield,
+    },
+    pending: {
+      label: "Pending",
+      color: "text-warning",
+      badgeClass: "bg-warning/10 text-warning border-warning/20",
+      icon: Clock,
+    },
+    rejected: {
+      label: "Unverified",
+      color: "text-destructive",
+      badgeClass: "bg-destructive/10 text-destructive border-destructive/20",
+      icon: AlertCircle,
+    },
+    not_submitted: {
+      label: "Unverified",
+      color: "text-destructive",
+      badgeClass: "bg-destructive/10 text-destructive border-destructive/20",
+      icon: AlertCircle,
+    },
+  };
+
+  const currentKyc = kycConfig[kyc_status] || kycConfig.not_submitted;
+  const KycIcon = currentKyc?.icon || AlertCircle;
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -324,8 +357,8 @@ function DashboardLayout({ isAdmin = false }) {
                     {" "}
                     {f_name} {l_name}{" "}
                   </p>
-                  <p className="mt-0.5 text-[11px] leading-none text-muted-foreground">
-                    {is_verified ? "Verified User" : "Unverified User"}
+                  <p className={cn("mt-0.5 text-[11px] leading-none font-medium", currentKyc.color)}>
+                    {currentKyc.label}
                   </p>
                 </div>
                 <ChevronDown
@@ -353,11 +386,10 @@ function DashboardLayout({ isAdmin = false }) {
                         </p>
                       </div>
                     </div>
-                    {is_verified && (
-                      <span className="secure-badge">
-                        <Shield className="h-2.5 w-2.5" /> KYC Verified
-                      </span>
-                    )}
+                    <div className={cn("flex items-center gap-1.5 px-2 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-wider w-fit", currentKyc.badgeClass)}>
+                      <KycIcon className="h-3 w-3" />
+                      {currentKyc.label}
+                    </div>
                   </div>
                   <Link
                     to="/dashboard/settings"
