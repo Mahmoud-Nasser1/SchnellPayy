@@ -26,7 +26,7 @@ import BillsPage from "./pages/dashboard/bills/Bills";
 import FundsPage from "./pages/dashboard/funds/Funds";
 import SettingsPage from "./pages/dashboard/settings/Settings";
 import AdminOverview from "./pages/admin/AdminOverview";
-import AdminUsers from "./pages/admin/AdminUsers";
+import AdminUsers from "./pages/admin/users/AdminUsers";
 import AdminKYC from "./pages/admin/AdminKYC";
 import AdminProviders from "./pages/admin/AdminProviders";
 import AdminServices from "./pages/admin/AdminServices";
