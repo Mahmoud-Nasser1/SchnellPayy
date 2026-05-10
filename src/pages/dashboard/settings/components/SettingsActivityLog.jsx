@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 
 const ACTION_MAP = {
   login_success: {
@@ -140,6 +140,7 @@ export default function SettingsActivityLog() {
               risk: "low",
             };
             const Icon = config.icon;
+            const dateObj = log.created_at ? new Date(log.created_at) : new Date();
 
             return (
               <motion.div
@@ -178,8 +179,11 @@ export default function SettingsActivityLog() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-[11px] font-medium text-muted-foreground whitespace-nowrap">
-                    {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
+                  <p className="text-[11px] font-bold text-foreground whitespace-nowrap">
+                    {format(dateObj, "MMM d, h:mm a")}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground whitespace-nowrap mt-0.5">
+                    {formatDistanceToNow(dateObj, { addSuffix: true })}
                   </p>
                 </div>
               </motion.div>

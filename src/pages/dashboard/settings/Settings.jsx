@@ -57,26 +57,12 @@ function SettingsPage() {
   const [emailNotif, setEmailNotif] = useState(true);
   const [smsNotif, setSmsNotif] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [kycUploads, setKycUploads] = useState({});
-  const [kycSubmitting, setKycSubmitting] = useState(false);
-  const [kycSubmitted, setKycSubmitted] = useState(false);
   const { toast } = useToast();
 
   const handleSave = async () => {
     setSaved(true);
     toast({ title: "Profile saved", description: "Your changes have been saved successfully." });
     setTimeout(() => setSaved(false), 2e3);
-  };
-
-  const handleKycSubmit = async () => {
-    setKycSubmitting(true);
-    await new Promise((r) => setTimeout(r, 1800));
-    setKycSubmitting(false);
-    setKycSubmitted(true);
-    toast({
-      title: "KYC Documents Submitted",
-      description: "Our team will review your documents within 24 hours.",
-    });
   };
 
   return (
@@ -137,13 +123,7 @@ function SettingsPage() {
               )}
 
               {activeTab === "kyc" && (
-                <SettingsKYC
-                  kycUploads={kycUploads}
-                  setKycUploads={setKycUploads}
-                  kycSubmitting={kycSubmitting}
-                  kycSubmitted={kycSubmitted}
-                  handleKycSubmit={handleKycSubmit}
-                />
+                <SettingsKYC />
               )}
             </motion.div>
           </AnimatePresence>
