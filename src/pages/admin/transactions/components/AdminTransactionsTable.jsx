@@ -78,9 +78,9 @@ export default function AdminTransactionsTable({ transactions, totalCount, page,
               </tr>
             ) : transactions.length > 0 ? (
               transactions.map((tx, i) => {
-                const isIncome = tx.transaction_type === "deposit";
+                const isIncome = tx.transaction_type === "deposit" || tx.transaction_type === "refund";
                 const isExpense = tx.transaction_type === "withdraw" || tx.transaction_type === "bill";
-                const isNeutral = tx.transaction_type === "transfer" || tx.transaction_type === "refund";
+                const isNeutral = tx.transaction_type === "transfer";
                   
                 const txName = tx.description || tx.sender_name || tx.receiver_name || tx.name || "Transaction";
                 const txId = tx.reference_number || tx.transaction_id || tx.id;
@@ -175,7 +175,9 @@ export default function AdminTransactionsTable({ transactions, totalCount, page,
                             </button>
                           </>
                         )}
-                        {tx.status?.toLowerCase() === "completed" && !tx.description?.startsWith("Refund") && (
+                        {tx.status?.toLowerCase() === "completed" && 
+                         tx.transaction_type === "transfer" && 
+                         !tx.description?.startsWith("Refund") && (
                           <button
                             onClick={() => handleRefund(tx.transaction_id)}
                             disabled={actionLoading === tx.transaction_id}
