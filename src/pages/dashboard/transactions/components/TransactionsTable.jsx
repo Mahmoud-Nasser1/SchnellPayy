@@ -9,7 +9,7 @@ const statusBadge = {
   failed: "badge-danger",
 };
 
-export default function TransactionsTable({ transactions, totalCount, page, setPage, totalPages, loading, userId }) {
+export default function TransactionsTable({ transactions, totalCount, page, setPage, totalPages, loading, userId, currentUsername }) {
   return (
     <motion.div
       variants={fadeUp}
@@ -47,7 +47,8 @@ export default function TransactionsTable({ transactions, totalCount, page, setP
                 const isCredit = 
                   tx.transaction_type === "deposit" || 
                   tx.transaction_type === "refund" || 
-                  (tx.transaction_type === "transfer" && tx.receiver_id === userId);
+                  tx.receiver_id == userId ||
+                  (tx.receiver_username && currentUsername && tx.receiver_username.toLowerCase() === currentUsername.toLowerCase());
                   
                 const txName = tx.description || tx.sender_name || tx.receiver_name || tx.name || "Transaction";
                 const txId = tx.reference_number || tx.transaction_id || tx.id;
@@ -70,7 +71,7 @@ export default function TransactionsTable({ transactions, totalCount, page, setP
                           )}
                         >
                           {isCredit ? (
-                            <ArrowDownLeft className="h-4 w-4 text-accent" />
+                            <ArrowDownLeft className="h-4 w-4 text-success" />
                           ) : (
                             <ArrowUpRight className="h-4 w-4 text-destructive" />
                           )}
@@ -103,7 +104,7 @@ export default function TransactionsTable({ transactions, totalCount, page, setP
                       <span
                         className={cn(
                           "text-sm font-semibold",
-                          isCredit ? "text-accent" : "text-destructive",
+                          isCredit ? "text-success" : "text-destructive",
                         )}
                       >
                         {isCredit ? "+" : "-"}${Math.abs(tx.amount).toLocaleString()}

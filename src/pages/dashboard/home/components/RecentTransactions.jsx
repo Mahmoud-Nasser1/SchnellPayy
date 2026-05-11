@@ -10,7 +10,8 @@ import { format } from "date-fns";
 function RecentTransactions() {
   const { user } = useAuthStore();
   const userData = user?.data || user || {};
-  const currentUsername = userData?.user_name;
+  const currentUsername = userData?.user_name || user?.user_name;
+  const userId = userData?.user_id || userData?.id || user?.user_id || user?.id;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["recent-transactions"],
@@ -18,7 +19,7 @@ function RecentTransactions() {
       const response = await api.get("/transactions/user?limit=5");
       return response.data;
     },
-    enabled: !!currentUsername,
+    enabled: !! currentUsername,
   });
 
   const transactions = data?.data || [];
@@ -64,7 +65,8 @@ function RecentTransactions() {
         ) : (
           transactions.map((tx) => {
             const isReceived = 
-              tx.receiver_username === currentUsername ||
+              tx.receiver_id == userId ||
+              (tx.receiver_username && currentUsername && tx.receiver_username.toLowerCase() === currentUsername.toLowerCase()) ||
               tx.transaction_type === "deposit" ||
               tx.transaction_type === "refund";
             const counterparty = isReceived

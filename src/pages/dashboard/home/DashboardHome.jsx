@@ -14,7 +14,8 @@ function DashboardHome() {
   const [balanceHidden, setBalanceHidden] = useState(false);
   const { user } = useAuthStore();
   const userData = user?.data || user || {};
-  const currentUsername = userData?.user_name;
+  const currentUsername = userData?.user_name || user?.user_name;
+  const userId = userData?.user_id || userData?.id || user?.user_id || user?.id;
   const currency = userData?.currency || "EGP";
 
   const { data: txResponse, isLoading } = useQuery({
@@ -34,7 +35,8 @@ function DashboardHome() {
     txs.forEach((tx) => {
       const amount = parseFloat(tx.amount) || 0;
       const isReceived = 
-        tx.receiver_username === currentUsername ||
+        tx.receiver_id == userId ||
+        (tx.receiver_username && currentUsername && tx.receiver_username.toLowerCase() === currentUsername.toLowerCase()) ||
         tx.transaction_type === "deposit" ||
         tx.transaction_type === "refund";
       

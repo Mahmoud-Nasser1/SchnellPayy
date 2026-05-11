@@ -27,6 +27,7 @@ function SendMoneyPage() {
   const [note, setNote] = useState(initialNote || "");
   const [loading, setLoading] = useState(false);
   const [pinOpen, setPinOpen] = useState(false);
+  const [transactionData, setTransactionData] = useState(null);
 
   const { fetchMe } = useAuthStore();
   const { toast } = useToast();
@@ -73,6 +74,7 @@ function SendMoneyPage() {
       const res = await api.post("/transactions/send", payload);
       
       if (res.data.success) {
+        setTransactionData(res.data.data);
         toast({
           title: "Transfer Successful",
           description: `Sent ${Number(amount).toFixed(2)} to ${selected.name}`,
@@ -153,6 +155,7 @@ function SendMoneyPage() {
             <SendSuccess
               selected={selected}
               amount={amount}
+              transactionData={transactionData}
               setStep={setStep}
               setSelected={setSelected}
               setAmount={setAmount}

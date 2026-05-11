@@ -13,7 +13,9 @@ import useAuthStore from "@/store/authStore";
 
 function TransactionsPage() {
   const { user } = useAuthStore();
-  const userId = user?.data?.user_id || user?.user_id;
+  const userData = user?.data || user || {};
+  const userId = userData?.user_id || userData?.id || user?.user_id || user?.id;
+  const currentUsername = userData?.user_name || user?.user_name;
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
@@ -111,7 +113,8 @@ function TransactionsPage() {
         const isCredit = 
           tx.transaction_type === "deposit" || 
           tx.transaction_type === "refund" ||
-          (tx.transaction_type === "transfer" && tx.receiver_id === userId);
+          tx.receiver_id == userId ||
+          (tx.receiver_username && currentUsername && tx.receiver_username.toLowerCase() === currentUsername.toLowerCase());
 
         const txName = tx.description || tx.sender_name || tx.receiver_name || tx.name || "Transaction";
         const txId = tx.reference_number || tx.transaction_id || tx.id;
@@ -185,6 +188,7 @@ function TransactionsPage() {
         totalPages={totalPages}
         loading={loading}
         userId={userId}
+        currentUsername={currentUsername}
         onTransactionUpdate={() => setRefreshTrigger((prev) => prev + 1)}
       />
     </motion.div>
