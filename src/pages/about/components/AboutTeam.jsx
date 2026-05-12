@@ -21,14 +21,14 @@ const team = [
     bio: "Focused on system integrity, encryption, and protecting financial data from vulnerabilities.",
   },
   {
-    name: "Yahya Abdalaa",
+    name: "Yahya Abdallah",
     role: "Software Engineer",
     img: "",
     bio: "Dedicated to developing seamless user experiences and high-performance system logic.",
   },
   {
     name: "Esraa Akram",
-    role: "Software Engineer | Data Analysis & ML",
+    role: "Software Engineer | Data  & ML",
     img: "",
     bio: "Specialized in data-driven insights and machine learning models for fraud detection.",
   },

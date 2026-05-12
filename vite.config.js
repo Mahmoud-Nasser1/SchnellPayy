@@ -11,6 +11,18 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8081,
+    proxy: {
+      "/api": {
+        target: "https://schnell-pay-back-end.vercel.app",
+        changeOrigin: true,
+        secure: false,
+      },
+      "/uploads": {
+        target: "https://schnell-pay-back-end.vercel.app",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
     hmr: {
       overlay: false,
     },

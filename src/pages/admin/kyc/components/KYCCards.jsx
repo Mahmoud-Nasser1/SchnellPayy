@@ -14,9 +14,9 @@ import {
 
 const getBaseHost = () => {
   const url = api.defaults.baseURL;
-  if (!url) return 'http://localhost:3000';
+  if (!url) return "https://schnell-pay-back-end.vercel.app";
   // Remove /api/v1 or similar from the end
-  return url.replace(/\/api\/v1\/?$/, '').replace(/\/api\/?$/, '');
+  return url.replace(/\/api\/v1\/?$/, "").replace(/\/api\/?$/, "");
 };
 
 export function KYCCards({ records, loading, onApprove, onReject }) {
@@ -56,14 +56,20 @@ export function KYCCards({ records, loading, onApprove, onReject }) {
         >
           <div className="flex items-start gap-4">
             <div className="gradient-card flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold text-primary-foreground">
-              {kyc.f_name?.[0]}{kyc.l_name?.[0]}
+              {kyc.f_name?.[0]}
+              {kyc.l_name?.[0]}
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="font-semibold text-foreground">{kyc.f_name} {kyc.l_name}</p>
+                  <p className="font-semibold text-foreground">
+                    {kyc.f_name} {kyc.l_name}
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    {kyc.email} · Submitted {new Date(kyc.verified_at || kyc.created_at || Date.now()).toLocaleDateString()}
+                    {kyc.email} · Submitted{" "}
+                    {new Date(
+                      kyc.verified_at || kyc.created_at || Date.now(),
+                    ).toLocaleDateString()}
                   </p>
                 </div>
                 <span
@@ -79,38 +85,43 @@ export function KYCCards({ records, loading, onApprove, onReject }) {
                   {kyc.KYC_status}
                 </span>
               </div>
-              
+
               <div className="mt-3 flex flex-wrap gap-2">
                 {[
                   { label: "Front ID", path: kyc.front_image },
                   { label: "Back ID", path: kyc.back_image },
-                  { label: "Selfie", path: kyc.selfie_image }
+                  { label: "Selfie", path: kyc.selfie_image },
                 ].map((doc) => {
-                  const normalizedPath = doc.path 
-                    ? doc.path.replace(/\\/g, '/').replace(/^\/?/, '/') 
+                  const normalizedPath = doc.path
+                    ? doc.path.replace(/\\/g, "/").replace(/^\/?/, "/")
                     : null;
-                  
-                  const imageUrl = normalizedPath 
-                    ? (normalizedPath.startsWith('http') ? normalizedPath : `${baseHost}${normalizedPath}`)
+
+                  const imageUrl = normalizedPath
+                    ? normalizedPath.startsWith("http")
+                      ? normalizedPath
+                      : `${baseHost}${normalizedPath}`
                     : null;
 
                   return (
                     <Dialog key={doc.label}>
                       <DialogTrigger asChild>
                         <button className="flex items-center gap-1.5 rounded-lg border border-border bg-muted px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:border-accent/50 hover:text-foreground">
-                          <FileCheck className="h-3 w-3" /> {doc.label} <Eye className="ml-0.5 h-3 w-3" />
+                          <FileCheck className="h-3 w-3" /> {doc.label}{" "}
+                          <Eye className="ml-0.5 h-3 w-3" />
                         </button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-[500px]">
                         <DialogHeader>
-                          <DialogTitle>{kyc.f_name} {kyc.l_name} - {doc.label}</DialogTitle>
+                          <DialogTitle>
+                            {kyc.f_name} {kyc.l_name} - {doc.label}
+                          </DialogTitle>
                         </DialogHeader>
                         <div className="mt-4 overflow-hidden rounded-xl border border-border flex flex-col items-center justify-center bg-muted/50 p-2">
                           {imageUrl ? (
-                            <img 
-                              src={imageUrl} 
-                              alt={doc.label} 
-                              className="w-full max-h-[60vh] object-contain rounded-lg shadow-lg" 
+                            <img
+                              src={imageUrl}
+                              alt={doc.label}
+                              className="w-full max-h-[60vh] object-contain rounded-lg shadow-lg"
                               onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = "/placeholder-kyc.png";
@@ -158,10 +169,11 @@ export function KYCCards({ records, loading, onApprove, onReject }) {
                   </motion.div>
                 )}
               </AnimatePresence>
-              
+
               {kyc.KYC_status === "rejected" && kyc.rejection_reason && (
                 <div className="mt-3 rounded-lg border border-destructive/20 bg-destructive/5 p-2 text-xs text-destructive">
-                  <span className="font-bold">Reason:</span> {kyc.rejection_reason}
+                  <span className="font-bold">Reason:</span>{" "}
+                  {kyc.rejection_reason}
                 </div>
               )}
             </div>
