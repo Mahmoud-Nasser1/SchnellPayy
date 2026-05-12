@@ -30,7 +30,7 @@ The frontend application for the Schnell-Pay digital wallet project. This interf
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/Mahmoud-Nasser1/SchnellPayy
+   git clone https://github.com/Mahmoud-Nasser1/SchnellPay-FrontEnd
    ```
 
 2. **Navigate to the project directory:**
