@@ -17,13 +17,14 @@ The frontend application for the Schnell-Pay digital wallet project. This interf
 
 ## Screenshots
 
-### Dashboard
-> *Screenshot of the user dashboard showing account balance and recent activities.*
-![Dashboard](placeholder-dashboard.png)
+### Home Page
+![Home](screenshots/s1.png)
 
-### Transaction Flow
-> *Screenshot of the transaction interface with the 6-digit PIN verification.*
-![Transaction Flow](placeholder-transaction.png)
+### Dashboard
+![Dashboard](screenshots/s2.png)
+
+### Send Money
+![Transactions](screenshots/s3.png)
 
 ## Installation & Setup
 
